@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>財神爺出題機</title>
+    <script src="[https://static.line-scdn.net/liff/edge/2/sdk.js](https://static.line-scdn.net/liff/edge/2/sdk.js)"></script>
+    <style>
+        /* ===== 過年喜氣配色 ===== */
+        :root {
+            --primary-red: #D32F2F;
+            --dark-red: #B71C1C;
+            --accent-gold: #FFC107;
+            --light-gold: #FFECB3;
+            --text-white: #ffffff;
+            --text-dark: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+            color: var(--text-white);
+            font-family: 'Microsoft JhengHei', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--accent-gold);
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--accent-gold);
+            font-size: 28px;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        p#greeting {
+            color: var(--light-gold);
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        /* ===== 表單元件 ===== */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-white);
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-gold);
+            background-color: #fff;
+            color: var(--text-dark);
+            font-size: 16px;
+            appearance: none; /* 隱藏原生下拉箭頭以統一風格 */
+            outline: none;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #FF9800 100%);
+            color: var(--text-dark);
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== 載入動畫 ===== */
+        .loading {
+            display: none;
+            color: var(--accent-gold);
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🏮 財神爺金頭腦 🏮</h1>
+        <p id="greeting">長輩好！請設定挑戰內容：</p>
+
+        <div class="form-group">
+            <label>🕰️ 選擇挑戰年代</label>
+            <select id="decade">
+                <option value="1970年代">1970 年代 (阿公阿嬤的最愛)</option>
+                <option value="1980年代">1980 年代 (爸爸媽媽的青春)</option>
+                <option value="1990年代">1990 年代 (懷舊金曲時代)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>📺 選擇題目類型</label>
+            <select id="category">
+                <option value="台語金曲">台語懷舊金曲</option>
+                <option value="國語老歌">國語經典老歌</option>
+                <option value="台灣俗諺">地方台灣俗諺</option>
+                <option value="經典連續劇">八點檔連續劇</option>
+            </select>
+        </div>
+
+        <button class="btn-submit" onclick="sendToBot()" id="submitBtn">擲筊求題 🎲</button>
+        <div class="loading" id="loadingMsg">發送中，請稍候...</div>
+    </div>
+
+    <script>
+        const liffId = "{{ liff_id }}";
+
+        // 初始化 LIFF
+        document.addEventListener("DOMContentLoaded", () => {
+            liff.init({ liffId: liffId })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    } else {
+                        liff.getProfile().then(profile => {
+                            document.getElementById('greeting').innerText = `${profile.displayName} 您好！請設定挑戰內容：`;
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('LIFF 初始化失敗:', err);
+                    alert("載入失敗，請確認網路或重新開啟");
+                });
+        });
+
+        // 發送訊息給機器人
+        function sendToBot() {
+            const btn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loadingMsg');
+            const decade = document.getElementById('decade').value;
+            const category = document.getElementById('category').value;
+            
+            btn.style.display = 'none';
+            loading.style.display = 'block';
+
+            // 代替使用者發送隱藏指令
+            liff.sendMessages([{
+                type: 'text',
+                text: `#出題 ${decade} ${category}`
+            }]).then(() => {
+                // 發送成功後關閉視窗
+                liff.closeWindow();
+            }).catch(err => {
+                alert("傳送失敗，請確認是否在 LINE 聊天室中開啟。");
+                btn.style.display = 'block';
+                loading.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
