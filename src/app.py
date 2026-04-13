@@ -134,18 +134,18 @@ def handle_message(event: MessageEvent):
             category = parts[2]
             
             # 先回覆等待訊息 (消耗 1 則訊息)
-            line_bot_api.reply_message(
-                event.reply_token, 
-                TextSendMessage(text=f"🎲 財神爺正在為您準備【{decade} {category}】的題目，請稍候...")
-            )
+            # line_bot_api.reply_message(
+            #     event.reply_token, 
+            #     TextSendMessage(text=f"🎲 財神爺正在為您準備【{decade} {category}】的題目，請稍候...")
+            # )
             
             # 呼叫 AI 出題並推送題目卡 (消耗 1 則訊息)
             quiz = generate_quiz(decade, category)
             if quiz:
                 flex_msg = get_quiz_flex(quiz)
-                line_bot_api.push_message(event.source.user_id, flex_msg)
+                line_bot_api.reply_message(event.reply_token, flex_msg)
             else:
-                line_bot_api.push_message(event.source.user_id, TextSendMessage(text="哎呀！財神爺打瞌睡了，請再試一次！"))
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text="哎呀！財神爺打瞌睡了，請再試一次！"))
         return
 
     # 2. 常規指令引導
@@ -167,7 +167,7 @@ def handle_postback(event: PostbackEvent):
         explanation = parsed.get('exp', [''])[0]
 
         if is_correct == "1":
-            # 🎁 新增：隨機虛擬獎品或籤詩池
+            # 隨機虛擬獎品或籤詩池
             prizes = [
                 "💰 【虛擬金元寶 1 錠】祝您今晚打牌自摸連連！",
                 "🥠 財神爺上上籤：【大吉】福星高照，買彩券必中！",
@@ -179,11 +179,12 @@ def handle_postback(event: PostbackEvent):
 
             # 把隨機獎品塞進回覆訊息裡
             reply_text = (
-                f"🎉 恭喜老爺/夫人，答對啦！\n\n"
-                f"🎁 答對獎勵：\n{random_prize}\n\n"
-                f"----------------------\n"
-                f"💡 {explanation}\n\n"
-                f"👉 點擊下方圖文選單再賺一個好運！"
+                f"🎉 恭喜老爺 賀喜夫人，答對啦！\n\n"
+                f"🎁 財神加碼送：\n"
+                f"{random_prize}\n\n"
+                f"💡 解答小教室：\n"
+                f"{explanation}\n\n"
+                f"👇 點擊下方選單，再賺一個好運！"
             )
         else:
             reply_text = (
