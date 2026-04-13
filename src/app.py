@@ -2,6 +2,7 @@ import os
 import json
 import re
 import logging
+import random
 from flask import Flask, request, abort, render_template, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -166,9 +167,30 @@ def handle_postback(event: PostbackEvent):
         explanation = parsed.get('exp', [''])[0]
 
         if is_correct == "1":
-            reply_text = f"🎉 恭喜老爺/夫人，答對啦！\n\n💡 {explanation}\n\n👉 點擊下方圖文選單再玩一局！"
+            # 🎁 新增：隨機虛擬獎品或籤詩池
+            prizes = [
+                "💰 【虛擬金元寶 1 錠】祝您今晚打牌自摸連連！",
+                "🥠 財神爺上上籤：【大吉】福星高照，買彩券必中！",
+                "🍎 【平安蘋果 1 顆】祝您新的一年平平安安，健康呷百二！",
+                "✨ 獲得專屬稱號：【家族金頭腦】！實在太聰明啦！",
+                "🧧 獲得【財神爺飛吻 1 個】好運一整年！"
+            ]
+            random_prize = random.choice(prizes)
+
+            # 把隨機獎品塞進回覆訊息裡
+            reply_text = (
+                f"🎉 恭喜老爺/夫人，答對啦！\n\n"
+                f"🎁 答對獎勵：\n{random_prize}\n\n"
+                f"----------------------\n"
+                f"💡 {explanation}\n\n"
+                f"👉 點擊下方圖文選單再賺一個好運！"
+            )
         else:
-            reply_text = f"❌ 哎呀，差一點點！\n\n💡 {explanation}\n\n👉 沒關係，點擊圖文選單再挑戰一次！"
+            reply_text = (
+                f"❌ 哎呀，差一點點！\n\n"
+                f"💡 {explanation}\n\n"
+                f"👉 沒關係，點擊下方圖文選單，財神爺再給您一次機會！"
+            )
 
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
 
