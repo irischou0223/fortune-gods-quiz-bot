@@ -25,6 +25,7 @@ class Config:
     LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
     LIFF_ID = os.environ.get('LIFF_ID')
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
+    GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash').strip()
 
 # 初始化 LINE Bot
 line_bot_api = LineBotApi(Config.LINE_CHANNEL_ACCESS_TOKEN)
@@ -57,7 +58,7 @@ def generate_quiz(decade: str, category: str) -> dict:
 
     try:
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model=Config.GEMINI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(temperature=0.7)
         )
